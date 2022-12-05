@@ -1,0 +1,8 @@
+*.pdf
+*.csv
+/data
+/figures
+/manuscript
+*.xlsx
+*.docx
+*.RData
