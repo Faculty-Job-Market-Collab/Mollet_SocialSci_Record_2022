@@ -1,6 +1,6 @@
 source("code/load_data.R")
 
-# Identify social science/humanities responses
+# Identify social science/humanities responses ----
 ss_ids <- demo_data %>% 
   filter(response == "Social, Behavior, & Economic Sciences" |
            response == "Humanities") %>% 
@@ -54,18 +54,18 @@ fig1_inst_data <- ss_tidy_data %>%
   distinct() %>% 
   filter(!is.na(response))
 
-fig1g_data <- ss_network %>% 
-  select(id, number_postdocs) %>% 
-  left_join(., fig1_res) %>% 
-  select(-section) %>% distinct()
-
-fig1h_data <- ss_app_outcomes %>% 
+fig1a_data <- ss_app_outcomes %>% 
   select(id, application_cycles) %>% 
   left_join(., fig1_res) %>% 
   select(-section) %>% distinct() %>% 
   mutate(num_application_cycles = if_else(
     str_detect(application_cycles, ">5"), 
     5, as.numeric(application_cycles)))
+
+fig1b_data <- ss_network %>% 
+  select(id, number_postdocs) %>% 
+  left_join(., fig1_res) %>% 
+  select(-section) %>% distinct()
 
 metric_data <- ss_qualif_data %>%
   left_join(., fig1_res, by = "id") %>% 
