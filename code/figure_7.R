@@ -24,9 +24,9 @@ fig7a_plot <- ggplot(data = fig7_data_two, aes(x = as.numeric(fig7_data_two$apps
            label = paste0("R: ", round(offsite_apps_cor_coefs$estimate, 2))) +
   annotate("text", x = 100, y = 15, 
            label = paste0("p-value: ", round(offsite_apps_cor_coefs$p.value, 25)))+
-  annotate("text", x = 80, y = 5, color = "#E69F00",
+  annotate("text", x = 80, y = 5, color = "#D55E00",
            label = paste0("R: ", round(offsite_apps_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = 4, color = "#E69F00",
+  annotate("text", x = 80, y = 4, color = "#D55E00",
            label = paste0("p-value: ", round(offsite_apps_man_cor_coefs$p.value, 10)))+
   annotate("text", x = 130, y = 11, color = "#009E73",
            label = paste0("R: ", round(offsite_apps_wom_cor_coefs$estimate, 2))) +
@@ -57,18 +57,18 @@ fig7b_plot <- ggplot(data = fig7_data_two, aes(x = as.numeric(fig7_data_two$apps
   scale_y_continuous(expand = c(0,0))+
   scale_x_continuous(expand = c(0,0))+
   geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = simple_gender, color = simple_gender), method=lm, se=TRUE) +
+  geom_smooth(aes(fill = simple_gender, color = simple_gender), method=lm, se=TRUE)+
   annotate("text", x = 130, y = 2.5, 
            label = paste0("R: ", round(onsite_apps_cor_coefs$estimate, 2))) +
   annotate("text", x = 130, y = 2.3, 
            label = paste0("p-value: ", round(onsite_apps_cor_coefs$p.value, 5)))+
-  annotate("text", x = 80, y = .75, color = "#E69F00",
+  annotate("text", x = 80, y = .75, color = "#009E73",
            label = paste0("R: ", round(onsite_apps_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = .25, color = "#E69F00",
+  annotate("text", x = 80, y = .25, color = "#009E73",
            label = paste0("p-value: ", round(onsite_apps_man_cor_coefs$p.value, 5)))+
-  annotate("text", x = 120, y = 6, color = "#009E73",
+  annotate("text", x = 120, y = 6, color = "#D55E00",
            label = paste0("R: ", round(onsite_apps_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 120, y = 5.7, color = "#009E73",
+  annotate("text", x = 120, y = 5.7, color = "#D55E00",
            label = paste0("p-value: ", round(onsite_apps_wom_cor_coefs$p.value, 5)))+
   labs(y = "Number of on-site interviews", x = "Number of applications submitted",
        fill = "Gender", color = "Gender")+
@@ -99,13 +99,13 @@ fig7c_plot <- ggplot(data = fig7_data_two, aes(x = as.numeric(fig7_data_two$apps
            label = paste0("R: ", round(off_app_cor_coefs$estimate, 2))) +
   annotate("text", x = 100, y = 2, 
            label = paste0("p-value: ", round(off_app_cor_coefs$p.value, 5)))+
-  annotate("text", x = 80, y = .3, color = "#E69F00",
+  annotate("text", x = 80, y = .3, color = "#009E73",
            label = paste0("R: ", round(off_app_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = .15, color = "#E69F00",
+  annotate("text", x = 80, y = .15, color = "#009E73",
            label = paste0("p-value: ", round(off_app_man_cor_coefs$p.value, 5)))+
-  annotate("text", x = 130, y = .3, color = "#009E73",
+  annotate("text", x = 130, y = .3, color = "#D55E00",
            label = paste0("R: ", round(off_app_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = .15, color = "#009E73",
+  annotate("text", x = 130, y = .15, color = "#D55E00",
            label = paste0("p-value: ", round(off_app_wom_cor_coefs$p.value, 5)))+
   labs(y = "Number of faculty offers", 
        x = "Number of applications submitted",
@@ -138,13 +138,13 @@ fig7d_plot <- ggplot(data = fig7_data_two, aes(x = as.numeric(fig7_data_two$facu
            label = paste0("R: ", round(offsite_offs_cor_coefs$estimate, 2))) +
   annotate("text", x = 4.5, y = 15, 
            label = paste0("p-value: ", round(offsite_offs_cor_coefs$p.value, 5)))+
-  annotate("text", x = 2, y = 12, color = "#E69F00",
+  annotate("text", x = 2, y = 12, color = "#009E73",
            label = paste0("R: ", round(offsite_offs_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 2, y = 11, color = "#E69F00",
+  annotate("text", x = 2, y = 11, color = "#009E73",
            label = paste0("p-value: ", round(offsite_offs_man_cor_coefs$p.value, 5)))+
-  annotate("text", x = 4.5, y = 2, color = "#009E73",
+  annotate("text", x = 4.5, y = 2, color = "#D55E00",
            label = paste0("R: ", round(offsite_offs_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 1, color = "#009E73",
+  annotate("text", x = 4.5, y = 1, color = "#D55E00",
            label = paste0("p-value: ", round(offsite_offs_wom_cor_coefs$p.value, 5)))+
   labs(y = "Number of off-site interviews", x = "Number of faculty offers",
        fill = "Gender:", color = "Gender:")+
@@ -177,13 +177,13 @@ fig7e_plot_leg <- ggplot(data = fig7_data_two,
            label = paste0("R: ", round(onsite_offers_cor_coefs$estimate, 2))) +
   annotate("text", x = 4.5, y = 3.5, 
            label = paste0("p-value: ", round(onsite_offers_cor_coefs$p.value, 25)))+
-  annotate("text", x = 2, y = 1.5, color = "#E69F00",
+  annotate("text", x = 2, y = 1.5, color = "#009E73",
            label = paste0("R: ", round(onsite_offers_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 2, y = 1.25, color = "#E69F00",
+  annotate("text", x = 2, y = 1.25, color = "#009E73",
            label = paste0("p-value: ", round(onsite_offers_man_cor_coefs$p.value, 10)))+
-  annotate("text", x = 3.5, y = 6.75, color = "#009E73",
+  annotate("text", x = 3.5, y = 6.75, color = "#D55E00",
            label = paste0("R: ", round(onsite_offers_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 3.5, y = 6.5, color = "#009E73",
+  annotate("text", x = 3.5, y = 6.5, color = "#D55E00",
            label = paste0("p-value: ", round(onsite_offers_wom_cor_coefs$p.value, 20)))+
   labs(y = "Number of on-site interviews", x = "Number of faculty offers",
        fill = "Gender:", color = "Gender:")+

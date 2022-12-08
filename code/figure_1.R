@@ -13,6 +13,11 @@ save_wilcox(fig1a_wilcox,
 fig1a_plot_leg <- fig1a_data %>% 
   get_plot_summary(., "research_category", 
                    "application_cycles", binary = FALSE) %>% 
+  mutate(research_category = if_else(research_category == "Social, Behavior, & Economic Sciences",
+                                     "Social, Behavior, &\nEconomic Sciences", research_category),
+         application_cycles = fct_explicit_na(application_cycles, "No\nResponse"),
+         application_cycles = factor(application_cycles, 
+                                     c("No\nResponse", "1", "2", "3", "4", "5", ">5"))) %>%
   ggplot(aes(x=application_cycles, y = percent,
              fill = research_category))+
   geom_col(position = "dodge")+

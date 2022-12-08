@@ -17,7 +17,8 @@ fig5a_plot <- fig5A_data %>%
   filter(question == "first_author_binned") %>% 
   get_plot_summary(., "simple_gender", "response", 
                    binary = FALSE) %>% 
-  mutate(response = factor(response, levels = bin_levels_small)) %>% 
+  mutate(response = factor(response, levels = bin_levels_small),
+         simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = simple_gender))+
   geom_col(position = "dodge")+
@@ -50,7 +51,8 @@ fig5b_plot <- fig5_data %>%
   get_plot_summary(., "simple_gender", "response", 
                    binary = FALSE) %>% 
   mutate(response = factor(response, 
-                           levels = bin_levels_small)) %>% 
+                           levels = bin_levels_small),
+         simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = simple_gender))+
   geom_col(position = "dodge")+
@@ -83,7 +85,8 @@ fig5c_plot <- fig5_data %>%
   get_plot_summary(., "simple_gender", "response", 
                    binary = FALSE) %>% 
   mutate(response = factor(response, 
-                           levels = bin_levels_small)) %>% 
+                           levels = bin_levels_small),
+         simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = simple_gender))+
   geom_col(position = "dodge")+
@@ -113,8 +116,9 @@ fig5d_plot <- fig5ef_data %>%
   spread(key = grant, value = n) %>% 
   mutate(total = yes + no,
          percent = get_percent(yes, total),
-         simple_gender = paste0(simple_gender, "\n(n = ", total, ")")) %>% 
-  ggplot(aes(x=simple_gender, y = as.numeric(percent),
+         gender_count = paste0(simple_gender, "\n(n = ", total, ")"),
+         simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
+  ggplot(aes(x=gender_count, y = as.numeric(percent),
              fill = simple_gender))+
   geom_col()+
   coord_flip()+
@@ -148,7 +152,8 @@ fig5e_plot <- fig5_data %>%
   get_plot_summary(., "simple_gender", "response", 
                    binary = FALSE) %>% 
   mutate(response = factor(response, levels = bin_levels_big),
-         response = fct_explicit_na(response, "No Response")) %>% 
+         response = fct_explicit_na(response, "No Response"),
+         simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = simple_gender))+
   geom_col(position = "dodge")+
@@ -178,9 +183,10 @@ fig5f_plot <- fig5ef_data %>%
   spread(key = fellowship, value = n) %>% 
   mutate(total = yes + no,
          percent = get_percent(yes, total),
-         simple_gender = paste0(simple_gender, 
-                                "\n(n = ", total, ")")) %>% 
-  ggplot(aes(x=simple_gender, y = as.numeric(percent),
+         gender_count = paste0(simple_gender, 
+                                "\n(n = ", total, ")"),
+         simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
+  ggplot(aes(x=gender_count, y = as.numeric(percent),
              fill = simple_gender))+
   geom_col()+
   coord_flip()+

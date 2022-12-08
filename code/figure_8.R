@@ -59,14 +59,14 @@ fig8b_plot <- ggplot(data = fig7_data, aes(x = as.numeric(apps_submitted),
   annotate("text", x = 125, y = 2.5, 
            label = paste0("p-value: ", round(onsite_apps_cor_coefs$p.value, 10)))+
   #peer data
-  annotate("text", x = 95, y = 5, color = "#E69F00",
+  annotate("text", x = 95, y = 5, color = "#56B4E9",
            label = paste0("R: ", round(onsite_apps_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 95, y = 4.5, color = "#E69F00",
+  annotate("text", x = 95, y = 4.5, color = "#56B4E9",
            label = paste0("p-value: ", round(onsite_apps_peer_cor_coefs$p.value, 5)))+
   #nonpeer data
-  annotate("text", x = 130, y = 6, color = "#56B4E9",
+  annotate("text", x = 130, y = 6, color = "#E69F00",
            label = paste0("R: ", round(onsite_apps_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = 5.5, color = "#56B4E9",
+  annotate("text", x = 130, y = 5.5, color = "#E69F00",
            label = paste0("p-value: ", round(onsite_apps_nonpeer_cor_coefs$p.value, 10)))+  
   labs(y = "Number of on-site interviews", x = "Number of applications submitted",
        fill = "PEER identity:", color = "PEER identity:")+
@@ -95,14 +95,14 @@ fig8c_plot <- ggplot(data = fig7_data, aes(x = as.numeric(fig7_data$apps_submitt
   annotate("text", x = 100, y = 1.75, 
            label = paste0("p-value: ", round(off_app_cor_coefs$p.value, 5)))+
   #peer data
-  annotate("text", x = 80, y = 4.5, color = "#E69F00",
+  annotate("text", x = 80, y = 4.5, color = "#56B4E9",
            label = paste0("R: ", round(off_app_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = 4.25, color = "#E69F00",
+  annotate("text", x = 80, y = 4.25, color = "#56B4E9",
            label = paste0("p-value: ", round(off_app_peer_cor_coefs$p.value, 5)))+
   #nonpeer data
-  annotate("text", x = 130, y = 0.5, color = "#56B4E9",
+  annotate("text", x = 130, y = 0.5, color = "#E69F00",
            label = paste0("R: ", round(off_app_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = .2, color = "#56B4E9",
+  annotate("text", x = 130, y = .2, color = "#E69F00",
            label = paste0("p-value: ", round(off_app_nonpeer_cor_coefs$p.value, 5)))+
   labs(y = "Number of faculty offers", x = "Number of applications submitted",
        fill = "PEER identity:", color = "PEER identity:")+
@@ -132,14 +132,14 @@ fig8d_plot <- ggplot(data = fig7_data, aes(x = as.numeric(faculty_offers),
   annotate("text", x = 4.5, y = 12, 
            label = paste0("p-value: ", round(offsite_offs_cor_coefs$p.value, 5)))+
   #peer data
-  annotate("text", x = .5, y = 1, color = "#E69F00",
+  annotate("text", x = .5, y = 1, color = "#56B4E9",
            label = paste0("R: ", round(offsite_offers_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = .5, y = 0.25, color = "#E69F00",
+  annotate("text", x = .5, y = 0.25, color = "#56B4E9",
            label = paste0("p-value: ", round(offsite_offers_peer_cor_coefs$p.value, 5)))+
   #nonpeer data
-  annotate("text", x = 4, y = 17, color = "#56B4E9",
+  annotate("text", x = 4, y = 17, color = "#E69F00",
            label = paste0("R: ", round(offsite_offers_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4, y = 16, color = "#56B4E9",
+  annotate("text", x = 4, y = 16, color = "#E69F00",
            label = paste0("p-value: ", round(offsite_offers_nonpeer_cor_coefs$p.value, 7)))+  
   labs(y = "Number of off-site interviews", x = "Number of faculty offers",
        fill = "PEER identity:", color = "PEER identity:")+
@@ -169,14 +169,14 @@ fig8e_plot_leg <- ggplot(data = fig7_data, aes(x = as.numeric(faculty_offers),
   annotate("text", x = 4.5, y = 7.2, 
            label = paste0("p-value: ", round(onsite_offers_cor_coefs$p.value, 25)))+
   #peer data
-  annotate("text", x = 4.5, y = 2.5, color = "#E69F00",
+  annotate("text", x = 4.5, y = 2.5, color = "#56B4E9",
            label = paste0("R: ", round(onsite_offers_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 2.20, color = "#E69F00",
+  annotate("text", x = 4.5, y = 2.20, color = "#56B4E9",
            label = paste0("p-value: ", round(onsite_offers_peer_cor_coefs$p.value, 10)))+
   #nonpeer data
-  annotate("text", x = 2.5, y = 5.5, color = "#56B4E9",
+  annotate("text", x = 2.5, y = 5.5, color = "#E69F00",
            label = paste0("R: ", round(onsite_offers_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 2.5, y = 5.2, color = "#56B4E9",
+  annotate("text", x = 2.5, y = 5.2, color = "#E69F00",
            label = paste0("p-value: ", round(onsite_offers_nonpeer_cor_coefs$p.value, 20)))+  
   labs(y = "Number of on-site interviews", x = "Number of faculty offers",
        fill = "PEER identity:", color = "PEER identity:")+

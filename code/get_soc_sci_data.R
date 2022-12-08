@@ -234,7 +234,9 @@ fig7_data <- ss_tidy_data %>%
     as.numeric(faculty_offers) >= 1 ~ "1+"
   ),
   simple_faculty_offer = factor(simple_faculty_offer, 
-                                levels = c("0", "1+")))
+                                levels = c("0", "1+")),
+  peer = factor(peer, peer_breaks),
+  simple_gender = factor(simple_gender, gender_simple_breaks))
 
 ss_id_simple_offer <- select(fig7_data, id, simple_faculty_offer)
 

@@ -17,7 +17,8 @@ fig6a_plot_leg <- fig6a_data %>%
   filter(question == "first_author_binned") %>% 
   get_plot_summary(., "peer", "response", 
                    binary = FALSE) %>% 
-  mutate(response = factor(response, levels = bin_levels_small)) %>% 
+  mutate(response = factor(response, levels = bin_levels_small),
+         peer = factor(peer, peer_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = peer))+
   geom_col(position = "dodge")+
@@ -55,7 +56,8 @@ fig6b_plot <- fig6_data %>%
   get_plot_summary(., "peer", "response", 
                    binary = FALSE) %>% 
   mutate(response = factor(response, 
-                           levels = bin_levels_small)) %>% 
+                           levels = bin_levels_small),
+         peer = factor(peer, peer_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = peer))+
   geom_col(position = "dodge")+
@@ -88,7 +90,8 @@ fig6c_plot <- fig6_data %>%
   get_plot_summary(., "peer", "response", 
                    binary = FALSE) %>% 
   mutate(response = factor(response, 
-                           levels = bin_levels_small)) %>% 
+                           levels = bin_levels_small),
+         peer = factor(peer, peer_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = peer))+
   geom_col(position = "dodge")+
@@ -118,8 +121,10 @@ fig6d_plot <- fig6ef_data %>%
   spread(key = grant, value = n) %>% 
   mutate(total = yes + no,
          percent = get_percent(yes, total),
-         peer = paste0(peer, "\n(n = ", total, ")")) %>% 
-  ggplot(aes(x=peer, y = as.numeric(percent),
+         peer_count = paste0(peer, "\n(n = ", total, ")"),
+         peer = factor(peer, peer_breaks)) %>%
+  ggplot(aes(x=peer_count, 
+             y = as.numeric(percent),
              fill = peer))+
   geom_col()+
   coord_flip()+
@@ -153,7 +158,8 @@ fig6e_plot <- fig6_data %>%
   get_plot_summary(., "peer", "response", 
                    binary = FALSE) %>% 
   mutate(response = factor(response, levels = bin_levels_big),
-         response = fct_explicit_na(response, "No Response")) %>% 
+         response = fct_explicit_na(response, "No Response"),
+         peer = factor(peer, peer_breaks)) %>% 
   ggplot(aes(x = response, y = percent,
              fill = peer))+
   geom_col(position = "dodge")+
@@ -183,9 +189,10 @@ fig6f_plot <- fig6ef_data %>%
   spread(key = fellowship, value = n) %>% 
   mutate(total = yes + no,
          percent = get_percent(yes, total),
-         peer = paste0(peer, 
-                                "\n(n = ", total, ")")) %>% 
-  ggplot(aes(x=peer, y = as.numeric(percent),
+         peer_count = paste0(peer, 
+                                "\n(n = ", total, ")"),
+         peer = factor(peer, peer_breaks)) %>% 
+  ggplot(aes(x=peer_count, y = as.numeric(percent),
              fill = peer))+
   geom_col()+
   coord_flip()+
