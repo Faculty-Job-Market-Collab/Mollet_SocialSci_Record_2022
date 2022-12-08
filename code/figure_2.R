@@ -1,162 +1,112 @@
-# Scholarly Metrics by Gender (Please use men and women instead of male/female)
-# Publication Metrics
+# Figure 2 Job Application benchmarks and their impact on success
 
-# Fig 2A 1st author pubs (Two-tailed Wilcoxon rank sum test)
-fig2A_mwu_data <- fig2A_data %>% 
-  filter(question == "first_author") %>% 
-  filter(simple_gender != "No Response") %>% distinct()
+#A. Gender ----
+fig2a_wilcox_data <-fig2_data %>% 
+  filter(simple_gender != "No Response")
 
+fig2a_apps_wilcox <- wilcox.test(as.numeric(apps_submitted) ~ simple_gender,
+                                 data = fig2a_wilcox_data,
+                                 na.rm=TRUE, paired=FALSE, 
+                                 exact=FALSE, conf.int=TRUE)
 
-fig2A_wilcox <- wilcox.test(as.numeric(response) ~ simple_gender,
-                            data = fig2A_mwu_data,
-                            na.rm=TRUE, paired=FALSE, 
-                            exact=FALSE, conf.int=TRUE)
+fig2a_offers_wilcox <- wilcox.test(as.numeric(faculty_offers) ~ simple_gender,
+                                data = fig2a_wilcox_data,
+                                na.rm=TRUE, paired=FALSE, 
+                                exact=FALSE, conf.int=TRUE)
 
-save_wilcox(fig2A_wilcox, 
-            file = "social_science/figures/fig2_first_auth_gender_mwu_test.csv")
+fig2a_onsite_wilcox <- wilcox.test(as.numeric(on_site_interviews) ~ simple_gender,
+                                data = fig2a_wilcox_data,
+                                na.rm=TRUE, paired=FALSE, 
+                                exact=FALSE, conf.int=TRUE)
 
-plot_mwu_bar_data(df = fig2A_data, q = "first_author", f = "simple_gender", 
-                  f_text = "Gender", mwu = "yes", l = "small", 
-                  bin = "yes")+
-  scale_fill_manual(values = cbPalette)+
-  scale_y_continuous(expand = c(0,0))+
-  labs(x = "Number of first author papers",
-       subtitle = "Mann Whitney U: p>0.05")+
-  my_theme_leg_horiz
+fig2a_offsite_wilcox <- wilcox.test(as.numeric(off_site_interviews) ~ simple_gender,
+                                data = fig2a_wilcox_data,
+                                na.rm=TRUE, paired=FALSE, 
+                                exact=FALSE, conf.int=TRUE)
 
-ggsave("social_science/figures/fig2_first_auth_gender.jpeg")
+wilcox_2a_list <- c("fig2a_apps_wilcox", "fig2a_offers_wilcox", 
+                    "fig2a_onsite_wilcox", "fig2a_offsite_wilcox")
 
-# Fig 2B Total Pubs (Two-tailed Wilcoxon rank sum test) 
-fig2B_mwu_data <-fig2_data %>% 
-  filter(question == "peer-reviewed_papers") %>% 
-  filter(simple_gender != "No Response") %>% 
-  distinct() 
+fig2_list <- c("2a apps submitted", "2a faculty offers", 
+               "2a onsite offers", "2a offsite wilcox")
 
-fig2B_wilcox <- wilcox.test(as.numeric(response) ~ simple_gender,
-                            data = fig2B_mwu_data,
-                            na.rm=TRUE, paired=FALSE, 
-                            exact=FALSE, conf.int=TRUE)
+wilcox_2a_df <- map2_df(wilcox_2a_list, fig2_list, get_wilcox_tbl)
 
-save_wilcox(fig2B_wilcox, 
-            file = "social_science/figures/fig2_peer-review_gender_mwu_test.csv")
+write_csv(wilcox_2a_df, 
+            file = paste0("mollet_socialsci/figures/fig2a_", 
+                          Sys.Date(), "_wilcox_test.csv"))
 
-plot_mwu_bar_data(df = fig2_data, q = "peer-reviewed_papers", 
-                  f = "simple_gender", 
-                  f_text = "Gender", mwu = "yes", 
-                  l = "small", bin = "yes")+
-  scale_fill_manual(values = cbPalette)+
-  scale_y_continuous(expand = c(0,0))+
-  labs(x = "Number of peer-reviewed papers",
-       subtitle = "Mann Whitney U: p>0.05")+
-  my_theme_leg_horiz
-
-ggsave("social_science/figures/fig2_num_peer-review_gender.jpeg")
-
-# Fig 2C All Citations (Two-tailed Wilcoxon rank sum test)
-fig2C_mwu_data <-fig2_data %>% 
-  filter(question == "scholar_citations_all") %>% 
-  filter(simple_gender != "No Response") %>% 
-  distinct() 
-
-fig2C_wilcox <- wilcox.test(as.numeric(response) ~ simple_gender,
-                            data = fig2C_mwu_data,
-                            na.rm=TRUE, paired=FALSE, 
-                            exact=FALSE, conf.int=TRUE)
-
-save_wilcox(fig2C_wilcox, 
-            file = "social_science/figures/fig2_scholar_citations_gender_mwu_test.csv")
-
-plot_mwu_bar_data(df = fig2_data, q = "scholar_citations_all", 
-                  f = "simple_gender", 
-                  f_text = "Gender", mwu = "yes", 
-                  l = "big", bin = "yes")+
-  scale_fill_manual(values = cbPalette)+
-  scale_y_continuous(expand = c(0,0))+
-  labs(x = "Number of Google Scholar Citations",
-       subtitle = "Mann Whitney U: p>0.05")+
-  my_theme_leg_horiz
-
-ggsave("social_science/figures/fig2_num_cites_gender.jpeg")
-
-# Fig 2D H-index (Two-tailed Wilcoxon rank sum test)
-fig2D_mwu_data <-fig2_data %>% 
-  filter(question == "scholar_hindex") %>% 
-  filter(simple_gender != "No Response") %>% 
-  distinct() 
-
-fig2D_wilcox <- wilcox.test(as.numeric(response) ~ simple_gender,
-                            data = fig2C_mwu_data,
-                            na.rm=TRUE, paired=FALSE, 
-                            exact=FALSE, conf.int=TRUE)
-
-save_wilcox(fig2D_wilcox, 
-            file = "social_science/figures/fig2_hindex_gender_mwu_test.csv")
-
-plot_mwu_bar_data(df = fig2_data, q = "scholar_hindex", 
-                  f = "simple_gender", 
-                  f_text = "Gender", mwu = "yes", 
-                  l = "small", bin = "yes")+
-  scale_fill_manual(values = cbPalette)+
-  scale_y_continuous(expand = c(0,0))+
-  labs(x = "Applicant Google Scholar H index",
-       subtitle = "Mann Whitney U: p>0.05")+
-  my_theme_leg_horiz
-
-ggsave("social_science/figures/fig2_hindex_gender.jpeg")
-
-# Fig 2E Percent of applicants w/ fellowships (chi-square)
-fig2e_tab_data <- fig2ef_data %>% 
-  filter(simple_gender != "No Response") 
-
-fig2e_table <- table(fig2e_tab_data$fellowship, 
-                     fig2e_tab_data$simple_gender)
-
-fig2e_table <- fig2e_table[,-3]
-
-fig2e_chi <- chisq.test(fig2e_table)
-
-fig2ef_data %>% 
-  count(simple_gender, fellowship) %>% 
-  spread(key = fellowship, value = n) %>% 
-  mutate(total = yes + no,
-         percent = get_percent(yes, total),
-         simple_gender = paste0(simple_gender, "\n(n = ", total, ")")) %>% 
-  ggplot(aes(x=simple_gender, y = as.numeric(percent)))+
-  geom_col()+
+##plot----
+fig2a_plot <- fig2_tidy_data %>%
+  ggplot(aes(x = simple_gender, fill = simple_gender, 
+             y = as.numeric(response)))+
+  geom_boxplot(position = "dodge")+
+  facet_wrap(~ question, scales = "free_x")+
   coord_flip()+
-  scale_fill_manual(values = cbPalette)+
   scale_y_continuous(expand = c(0,0))+
-  labs(y="Percent of responses", 
-       x="Gender of applicants that received a pre- or\npostdoctoral fellowship",
-       subtitle = "Pearson's Chi-squared test with Yates' continuity correction\np>0.05")+
-  my_theme_horiz
+  scale_fill_manual(breaks = gender_simple_breaks, values = gender_color)+
+  labs(y = "Number per applicant", x = "Gender",
+       subtitle = "Wilcoxon rank sum test\nwith continuity correction: ns")+
+  my_theme_horiz+
+  theme(strip.background = element_rect(linetype = "blank"),
+        panel.spacing.x = unit(1, "cm"))
 
-ggsave("social_science/figures/fig2_percent_fellowships_gender.jpeg")
+ggsave(filename = paste0("mollet_socialsci/figures/fig2a_", 
+                         Sys.Date(), ".jpeg"))
 
-# Fig 2F Percent of applicants w/ grants (chi-square)
-fig2f_tab_data <- fig2ef_data %>% 
-  filter(simple_gender != "No Response") 
-  
-fig2f_table <- table(fig2f_tab_data$grant, 
-                     fig2f_tab_data$simple_gender)
+#B. Peer----
+fig2b_apps_wilcox <- wilcox.test(as.numeric(apps_submitted) ~ peer,
+                                 data = fig2_data,
+                                 na.rm=TRUE, paired=FALSE, 
+                                 exact=FALSE, conf.int=TRUE)
 
-fig2f_table <- fig2f_table[,-3]
+fig2b_offers_wilcox <- wilcox.test(as.numeric(faculty_offers) ~ peer,
+                                   data = fig2_data,
+                                   na.rm=TRUE, paired=FALSE, 
+                                   exact=FALSE, conf.int=TRUE)
 
-fig2f_chi <- chisq.test(fig2f_table)
+fig2b_onsite_wilcox <- wilcox.test(as.numeric(on_site_interviews) ~ peer,
+                                   data = fig2_data,
+                                   na.rm=TRUE, paired=FALSE, 
+                                   exact=FALSE, conf.int=TRUE)
 
-fig2ef_data %>% 
-  count(simple_gender, grant) %>% 
-  spread(key = grant, value = n) %>% 
-  mutate(total = yes + no,
-         percent = get_percent(yes, total),
-         simple_gender = paste0(simple_gender, "\n(n = ", total, ")")) %>% 
-  ggplot(aes(x=simple_gender, y = as.numeric(percent)))+
-  geom_col()+
+fig2b_offsite_wilcox <- wilcox.test(as.numeric(off_site_interviews) ~ peer,
+                                    data = fig2_data,
+                                    na.rm=TRUE, paired=FALSE, 
+                                    exact=FALSE, conf.int=TRUE)
+
+wilcox_2b_list <- c("fig2b_apps_wilcox", "fig2b_offers_wilcox", 
+                    "fig2b_onsite_wilcox", "fig2b_offsite_wilcox")
+
+fig2_list <- c("2b apps submitted", "2b faculty offers", 
+               "2b onsite offers", "2b offsite wilcox")
+
+wilcox_2b_df <- map2_df(wilcox_2b_list, fig2_list, get_wilcox_tbl)
+
+write_csv(wilcox_2b_df, 
+          file = paste0("mollet_socialsci/figures/fig2b_", 
+                        Sys.Date(), "_wilcox_test.csv"))
+##plot----
+fig2b_plot <- fig2_tidy_data %>% 
+  ggplot(aes(x = peer, fill = peer, y = as.numeric(response)))+
+  geom_boxplot(position = "dodge")+
+  facet_wrap(~ question, scales = "free_x")+
   coord_flip()+
-  scale_fill_manual(values = cbPalette)+
+  scale_fill_manual(breaks = peer_breaks, values = peer_color)+
   scale_y_continuous(expand = c(0,0))+
-  labs(y="Percent of responses", x="Gender of applicants that recieved a grant",
-       subtitle = paste0("Pearson's Chi-squared test with Yates' continuity correction\np>0.05"))+
-  my_theme_horiz
+  #scale_x_discrete(expand = c(0,0))+
+  labs(y = "Number per applicant", x = "PEER identity",
+       subtitle = "Wilcoxon rank sum test\nwith continuity correction: ns")+
+  my_theme_horiz+
+  theme(strip.background = element_rect(linetype = "blank"),
+        panel.spacing.x = unit(1, "cm"))
 
-ggsave("social_science/figures/fig2_percent_grants_gender.jpeg")
+ggsave(filename = paste0("mollet_socialsci/figures/fig2b_", 
+                         Sys.Date(), ".jpeg"))
+
+#generate plot----
+plot_grid(fig2a_plot, fig2b_plot, nrow = 2)
+
+ggsave(filename = paste0("Figure_2_", Sys.Date(), ".png"), 
+       device = 'png', units = "in", scale = 1.75,
+       path = 'mollet_socialsci/figures/', width = 8, height = 8)

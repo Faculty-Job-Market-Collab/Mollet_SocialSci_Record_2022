@@ -1,439 +1,231 @@
-# Job Application benchmarks and their impact on success
+#Figure 4 - eLife fig 5B - metrics vs % offers
 
-# Fig 4A Subgroup Medians (application, Remote Interview, on-site interview, offer)
-# All; Men & Women; URM & Non-URM; 1+ offer & no offer
+#A. teaching experience----
+teach_data <- fig4_data %>% 
+  filter(question == "teaching_status") %>% distinct()
 
-fig4_tidy_data %>% 
-  filter(question != "apps_submitted_binned") %>% 
-  ggplot(aes(x = simple_gender, fill = simple_gender, y = as.numeric(response)))+
-  geom_boxplot(position = "dodge")+
-  facet_wrap(~ question, scales = "free_x")+
+fig4_teach_wilcox <- wilcox.test(perc_offers ~ response,
+                            data = teach_data,
+                            na.rm=TRUE, paired=FALSE, 
+                            exact=FALSE, conf.int=TRUE)
+
+fig4a_plot <- teach_data %>% 
+  ggplot(aes(x = response, y = perc_offers, 
+             color = response))+
+  geom_violin()+
+  geom_jitter()+
   coord_flip()+
+  scale_color_manual(values = cbPalette)+
   scale_y_continuous(expand = c(0,0))+
-  scale_fill_manual(values = cbPalette)+
-  labs(y = "Number", x = "Gender")+
+  labs(x="Teaching Experience\n(n=151)", y="Percent offers\n",
+       subtitle = "Mann Whitney U: ns")+
   my_theme_horiz
 
-ggsave("social_science/figures/fig4_gender_outcome_boxplots.jpeg")
+ggsave(filename = paste0("mollet_socialsci/figures/fig4a_",
+                         Sys.Date(), ".jpeg"))
 
+#B. total citations: above/below median----
+cites_data <- fig4_data %>% 
+  filter(question == "scholar_citations_all") %>% 
+  mutate(median = if_else(response >= 42.0, 
+                          "Above the\nmedian (42+)", 
+                          "Below the\nmedian (<42)")) %>% 
+  distinct()
+  
 
-fig4_tidy_data %>% 
-  filter(question != "apps_submitted_binned") %>% 
-  ggplot(aes(x = peer, fill = peer, y = as.numeric(response)))+
-  geom_boxplot(position = "dodge")+
-  facet_wrap(~ question, scales = "free_x")+
+fig4_cites_wilcox <- wilcox.test(perc_offers ~ median,
+                              data = cites_data,
+                              na.rm=TRUE, paired=FALSE, 
+                              exact=FALSE, conf.int=TRUE)
+
+fig4b_plot <- cites_data %>% 
+  ggplot(aes(x = median, y = perc_offers, 
+             color = median))+
+  geom_violin()+
+  geom_jitter()+
   coord_flip()+
-  scale_fill_manual(values = cbPalette)+
+  scale_color_manual(values = cbPalette)+
   scale_y_continuous(expand = c(0,0))+
-  #scale_x_discrete(expand = c(0,0))+
-  labs(y = "Number", x = "PEER identity")+
+  labs(x="\nGoogle Scholar\nCitations (n=93)", y="Percent offers\n",
+       subtitle = "Mann Whitney U: ns")+
   my_theme_horiz
 
-ggsave("social_science/figures/fig4_peer_outcome_boxplots.jpeg")
+ggsave(filename = paste0("mollet_socialsci/figures/fig4b_",
+                         Sys.Date(), ".jpeg"))
 
-fig4_tidy_data %>% 
-  filter(question != "apps_submitted_binned") %>% 
-  ggplot(aes(x = simple_faculty_offer, fill = simple_faculty_offer, y = as.numeric(response)))+
-  geom_boxplot(position = "dodge")+
-  facet_wrap(~ question, scales = "free_x")+
+#C. years on the job market: above/below median----
+years_data <- fig4_data %>% 
+  filter(question == "application_cycles") %>% 
+  mutate(median = if_else(response >= 2.0, "Above the\nmedian (2+)", 
+                          "Below the\nmedian (1)")) %>% 
+  distinct()
+
+
+fig4_years_wilcox <- wilcox.test(perc_offers ~ median,
+                                 data = years_data,
+                                 na.rm=TRUE, paired=FALSE, 
+                                 exact=FALSE, conf.int=TRUE)
+
+fig4c_plot <- years_data %>% 
+  ggplot(aes(x = median, y = perc_offers, 
+             color = median))+
+  geom_violin()+
+  geom_jitter()+
   coord_flip()+
-  scale_fill_manual(values = cbPalette)+
+  scale_color_manual(values = cbPalette)+
   scale_y_continuous(expand = c(0,0))+
-  #scale_x_discrete(expand = c(0,0))+
-  labs(y = "Number", x = "Faculty offers")+
+  labs(x="Application\nCycles (n=183)", 
+       y="Percent offers\n",
+       subtitle = "Mann Whitney U: ns")+
   my_theme_horiz
 
-ggsave("social_science/figures/fig4_offers_outcome_boxplots.jpeg")
+ggsave(filename = paste0("mollet_socialsci/figures/fig4c_",
+                         Sys.Date(), ".jpeg"))
 
-# Fig 4B Correlations with Application Numbers (Remote, on-site, offers) -- Differences in correlations by gender & race
+#D. postdoc fellowship: y/n----
+fellow_data <- fig4_data %>% 
+  filter(question == "grants_awarded") %>% distinct() %>% 
+  select(-question) %>% 
+  filter(response != "Transition to Independence Award ") %>% 
+  mutate(status = "Yes",
+         response = str_remove_all(response, "(?<=Grant).*")) %>% 
+  distinct() %>% 
+  spread(key = response, value = status) %>% 
+  mutate(across(3:5, ~ if_else(is.na(.), "No", .)))
 
-off_app_cor_coefs <- cor.test(as.numeric(fig4_data$apps_submitted), 
-                            as.numeric(fig4_data$faculty_offers))
+fig4_postfellow_wilcox <- wilcox.test(perc_offers ~ `Postdoctoral Fellowship`,
+                              data = fellow_data,
+                              na.rm=TRUE, paired=FALSE, 
+                              exact=FALSE, conf.int=TRUE)
 
-off_app_man_cor_coefs <- cor.test(as.numeric(fig4_data_men$apps_submitted), 
-                              as.numeric(fig4_data_men$faculty_offers))
-
-off_app_wom_cor_coefs <- cor.test(as.numeric(fig4_data_women$apps_submitted), 
-                              as.numeric(fig4_data_women$faculty_offers))
-      
-ggplot(data = fig4_data_two, aes(x = as.numeric(fig4_data_two$apps_submitted), 
-                             y = as.numeric(fig4_data_two$faculty_offers)))+
-  geom_point(aes(fill = simple_gender, color = simple_gender)) +
-  scale_fill_manual(values = gender_color)+
-  scale_color_manual(values = gender_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = simple_gender, color = simple_gender), method=lm, se=TRUE)+
-  annotate("text", x = 100, y = 2.25, 
-           label = paste0("R: ", round(off_app_cor_coefs$estimate, 2))) +
-  annotate("text", x = 100, y = 2, 
-           label = paste0("p-value: ", round(off_app_cor_coefs$p.value, 5)))+
-  annotate("text", x = 80, y = .2, color = "#E69F00",
-           label = paste0("R: ", round(off_app_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = .1, color = "#E69F00",
-           label = paste0("p-value: ", round(off_app_man_cor_coefs$p.value, 5)))+
-  annotate("text", x = 130, y = .2, color = "#009E73",
-           label = paste0("R: ", round(off_app_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = .1, color = "#009E73",
-           label = paste0("p-value: ", round(off_app_wom_cor_coefs$p.value, 5)))+
-  labs(y = "Number of faculty offers", x = "Number of applications submitted",
-       fill = "Gender:", color = "Gender:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_apps_offers_gen_corr.jpeg")
-
-offsite_apps_cor_coefs <- cor.test(as.numeric(fig4_data$apps_submitted), 
-                                    as.numeric(fig4_data$off_site_interviews))
-
-offsite_apps_man_cor_coefs <- cor.test(as.numeric(fig4_data_men$apps_submitted), 
-                                  as.numeric(fig4_data_men$off_site_interviews))
-
-offsite_apps_wom_cor_coefs <- cor.test(as.numeric(fig4_data_women$apps_submitted), 
-                                  as.numeric(fig4_data_women$off_site_interviews))
-
-
-ggplot(data = fig4_data_two, aes(x = as.numeric(fig4_data_two$apps_submitted), 
-                             y = as.numeric(fig4_data_two$off_site_interviews))) +
-  geom_point(aes(fill = simple_gender, color = simple_gender)) +
-  scale_fill_manual(values = gender_color)+
-  scale_color_manual(values = gender_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = simple_gender, color = simple_gender), method=lm, se=TRUE) +
-  annotate("text", x = 100, y = 16, 
-           label = paste0("R: ", round(offsite_apps_cor_coefs$estimate, 2))) +
-  annotate("text", x = 100, y = 15, 
-           label = paste0("p-value: ", round(offsite_apps_cor_coefs$p.value, 25)))+
-  annotate("text", x = 80, y = 5, color = "#E69F00",
-           label = paste0("R: ", round(offsite_apps_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = 4, color = "#E69F00",
-           label = paste0("p-value: ", round(offsite_apps_man_cor_coefs$p.value, 10)))+
-  annotate("text", x = 130, y = 11, color = "#009E73",
-           label = paste0("R: ", round(offsite_apps_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = 10, color = "#009E73",
-           label = paste0("p-value: ", round(offsite_apps_wom_cor_coefs$p.value, 20)))+
-  labs(y = "Number of off-site interviews", x = "Number of applications submitted",
-       fill = "Gender", color = "Gender")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_apps_off-site_gen_corr.jpeg")
-
-onsite_apps_cor_coefs <- cor.test(as.numeric(fig4_data$apps_submitted), 
-                                   as.numeric(fig4_data$on_site_interviews))
-
-onsite_apps_man_cor_coefs <- cor.test(as.numeric(fig4_data_men$apps_submitted), 
-                                       as.numeric(fig4_data_men$on_site_interviews))
-
-onsite_apps_wom_cor_coefs <- cor.test(as.numeric(fig4_data_women$apps_submitted), 
-                                       as.numeric(fig4_data_women$on_site_interviews))
-
-
-ggplot(data = fig4_data_two, aes(x = as.numeric(fig4_data_two$apps_submitted), 
-                             y = as.numeric(fig4_data_two$on_site_interviews))) +
-  geom_point(aes(fill = simple_gender, color = simple_gender)) +
-  scale_fill_manual(values = gender_color)+
-  scale_color_manual(values = gender_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = simple_gender, color = simple_gender), method=lm, se=TRUE) +
-  annotate("text", x = 130, y = 2.5, 
-           label = paste0("R: ", round(onsite_apps_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = 2.3, 
-           label = paste0("p-value: ", round(onsite_apps_cor_coefs$p.value, 5)))+
-  annotate("text", x = 80, y = .75, color = "#E69F00",
-           label = paste0("R: ", round(onsite_apps_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = .25, color = "#E69F00",
-           label = paste0("p-value: ", round(onsite_apps_man_cor_coefs$p.value, 5)))+
-  annotate("text", x = 120, y = 6, color = "#009E73",
-           label = paste0("R: ", round(onsite_apps_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 120, y = 5.7, color = "#009E73",
-           label = paste0("p-value: ", round(onsite_apps_wom_cor_coefs$p.value, 5)))+
-  labs(y = "Number of on-site interviews", x = "Number of applications submitted",
-       fill = "Gender", color = "Gender")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_apps_on-site_gen_corr.jpeg")
-
-#race
-off_app_peer_cor_coefs <- cor.test(as.numeric(fig4_data_peer$apps_submitted), 
-                                  as.numeric(fig4_data_peer$faculty_offers))
-
-off_app_nonpeer_cor_coefs <- cor.test(as.numeric(fig4_data_nonpeer$apps_submitted), 
-                                  as.numeric(fig4_data_nonpeer$faculty_offers))
-
-ggplot(data = fig4_data, aes(x = as.numeric(fig4_data$apps_submitted), 
-                             y = as.numeric(fig4_data$faculty_offers))) +
-  geom_point(aes(fill = peer, color = peer)) +
-  scale_fill_manual(values = peer_color)+
-  scale_color_manual(values = peer_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = peer, color = peer), method=lm, se=TRUE) +
-  annotate("text", x = 100, y = 2, 
-           label = paste0("R: ", round(off_app_cor_coefs$estimate, 2))) +
-  annotate("text", x = 100, y = 1.75, 
-           label = paste0("p-value: ", round(off_app_cor_coefs$p.value, 5)))+
-  #peer data
-  annotate("text", x = 80, y = 4.5, color = "#CC79A7",
-           label = paste0("R: ", round(off_app_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 80, y = 4.25, color = "#CC79A7",
-           label = paste0("p-value: ", round(off_app_peer_cor_coefs$p.value, 5)))+
-  #nonpeer data
-  annotate("text", x = 130, y = 0.5, color = "#56B4E9",
-           label = paste0("R: ", round(off_app_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = .2, color = "#56B4E9",
-           label = paste0("p-value: ", round(off_app_nonpeer_cor_coefs$p.value, 5)))+
-  labs(y = "Number of faculty offers", x = "Number of applications submitted",
-       fill = "PEER identity:", color = "PEER identity:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_apps_offers_peer_corr.jpeg")
-
-offsite_apps_peer_cor_coefs <- cor.test(as.numeric(fig4_data_peer$apps_submitted), 
-                                       as.numeric(fig4_data_peer$off_site_interviews))
-
-offsite_apps_nonpeer_cor_coefs <- cor.test(as.numeric(fig4_data_nonpeer$apps_submitted), 
-                                       as.numeric(fig4_data_nonpeer$off_site_interviews))
-
-
-ggplot(data = fig4_data, aes(x = as.numeric(fig4_data$apps_submitted), 
-                             y = as.numeric(fig4_data$off_site_interviews))) +
-  geom_point(aes(fill = peer, color = peer)) +
-  scale_fill_manual(values = peer_color)+
-  scale_color_manual(values = peer_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = peer, color = peer), method=lm, se=TRUE) +
-  annotate("text", x = 100, y = 16, 
-           label = paste0("R: ", round(offsite_apps_cor_coefs$estimate, 2))) +
-  annotate("text", x = 100, y = 15, 
-           label = paste0("p-value: ", round(offsite_apps_cor_coefs$p.value, 5)))+
-  #peer data
-  annotate("text", x = 100, y = 5, color = "#CC79A7",
-           label = paste0("R: ", round(offsite_apps_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 100, y = 4, color = "#CC79A7",
-           label = paste0("p-value: ", round(offsite_apps_peer_cor_coefs$p.value, 5)))+
-  #nonpeer data
-  annotate("text", x = 130, y = 10, color = "#56B4E9",
-           label = paste0("R: ", round(offsite_apps_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = 9, color = "#56B4E9",
-           label = paste0("p-value: ", round(offsite_apps_nonpeer_cor_coefs$p.value, 21)))+  
-  labs(y = "Number of off-site interviews", x = "Number of applications submitted",
-       fill = "PEER identity:", color = "PEER identity:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_apps_off-site_peer_corr.jpeg")
-
-onsite_apps_peer_cor_coefs <- cor.test(as.numeric(fig4_data_peer$apps_submitted), 
-                                      as.numeric(fig4_data_peer$on_site_interviews))
-
-onsite_apps_nonpeer_cor_coefs <- cor.test(as.numeric(fig4_data_nonpeer$apps_submitted), 
-                                      as.numeric(fig4_data_nonpeer$on_site_interviews))
-
-
-ggplot(data = fig4_data, aes(x = as.numeric(apps_submitted), 
-                             y = as.numeric(on_site_interviews))) +
-  geom_point(aes(fill = peer, color = peer)) +
-  scale_fill_manual(values = peer_color)+
-  scale_color_manual(values = peer_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999")+
-  geom_smooth(aes(fill = peer, color = peer), method=lm, se=TRUE)+
-  annotate("text", x = 125, y = 3, 
-           label = paste0("R: ", round(onsite_apps_cor_coefs$estimate, 2))) +
-  annotate("text", x = 125, y = 2.5, 
-           label = paste0("p-value: ", round(onsite_apps_cor_coefs$p.value, 10)))+
-  #peer data
-  annotate("text", x = 95, y = 5, color = "#CC79A7",
-           label = paste0("R: ", round(onsite_apps_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 95, y = 4.5, color = "#CC79A7",
-           label = paste0("p-value: ", round(onsite_apps_peer_cor_coefs$p.value, 5)))+
-  #nonpeer data
-  annotate("text", x = 130, y = 6, color = "#56B4E9",
-           label = paste0("R: ", round(onsite_apps_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 130, y = 5.5, color = "#56B4E9",
-           label = paste0("p-value: ", round(onsite_apps_nonpeer_cor_coefs$p.value, 10)))+  
-  labs(y = "Number of on-site interviews", x = "Number of applications submitted",
-       fill = "PEER identity:", color = "PEER identity:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_apps_on-site_peer_corr.jpeg")
-
-# Fig 4C Correlations between interviews and offers (remote, off-site) -- Differences in correlations by gender & race
-
-offsite_offs_cor_coefs <- cor.test(as.numeric(fig4_data$faculty_offers), 
-                                   as.numeric(fig4_data$off_site_interviews))
-
-offsite_offs_man_cor_coefs <- cor.test(as.numeric(fig4_data_men$faculty_offers), 
-                                       as.numeric(fig4_data_men$off_site_interviews))
-
-offsite_offs_wom_cor_coefs <- cor.test(as.numeric(fig4_data_women$faculty_offers), 
-                                       as.numeric(fig4_data_women$off_site_interviews))
-
-
-ggplot(data = fig4_data_two, aes(x = as.numeric(fig4_data_two$faculty_offers), 
-                             y = as.numeric(fig4_data_two$off_site_interviews))) +
-  geom_point(aes(fill = simple_gender, color = simple_gender)) +
-  scale_fill_manual(values = gender_color)+
-  scale_color_manual(values = gender_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = simple_gender, color = simple_gender), method=lm, se=TRUE) +
-  annotate("text", x = 4.5, y = 16, 
-           label = paste0("R: ", round(offsite_offs_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 15, 
-           label = paste0("p-value: ", round(offsite_offs_cor_coefs$p.value, 5)))+
-  annotate("text", x = 2, y = 12, color = "#E69F00",
-           label = paste0("R: ", round(offsite_offs_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 2, y = 11, color = "#E69F00",
-           label = paste0("p-value: ", round(offsite_offs_man_cor_coefs$p.value, 5)))+
-  annotate("text", x = 4.5, y = 2, color = "#009E73",
-           label = paste0("R: ", round(offsite_offs_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 1, color = "#009E73",
-           label = paste0("p-value: ", round(offsite_offs_wom_cor_coefs$p.value, 5)))+
-  labs(y = "Number of off-site interviews", x = "Number of faculty offers",
-       fill = "Gender:", color = "Gender:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_offers_off-site_gen_corr.jpeg")
-
-onsite_offers_cor_coefs <- cor.test(as.numeric(fig4_data$faculty_offers), 
-                                  as.numeric(fig4_data$on_site_interviews))
-
-onsite_offers_man_cor_coefs <- cor.test(as.numeric(fig4_data_men$faculty_offers), 
-                                      as.numeric(fig4_data_men$on_site_interviews))
-
-onsite_offers_wom_cor_coefs <- cor.test(as.numeric(fig4_data_women$faculty_offers), 
-                                      as.numeric(fig4_data_women$on_site_interviews))
-
-
-ggplot(data = fig4_data_two, aes(x = as.numeric(faculty_offers), 
-                             y = as.numeric(on_site_interviews))) +
-  geom_point(aes(fill = simple_gender, color = simple_gender)) +
-  scale_fill_manual(values = gender_color)+
-  scale_color_manual(values = gender_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = simple_gender, color = simple_gender), method=lm, se=TRUE) +
-  annotate("text", x = 4.5, y = 4, 
-           label = paste0("R: ", round(onsite_offers_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 3.5, 
-           label = paste0("p-value: ", round(onsite_offers_cor_coefs$p.value, 25)))+
-  annotate("text", x = 2, y = 1.5, color = "#E69F00",
-           label = paste0("R: ", round(onsite_offers_man_cor_coefs$estimate, 2))) +
-  annotate("text", x = 2, y = 1.25, color = "#E69F00",
-           label = paste0("p-value: ", round(onsite_offers_man_cor_coefs$p.value, 10)))+
-  annotate("text", x = 3.5, y = 6.75, color = "#009E73",
-           label = paste0("R: ", round(onsite_offers_wom_cor_coefs$estimate, 2))) +
-  annotate("text", x = 3.5, y = 6.5, color = "#009E73",
-           label = paste0("p-value: ", round(onsite_offers_wom_cor_coefs$p.value, 20)))+
-  labs(y = "Number of on-site interviews", x = "Number of faculty offers",
-       fill = "Gender:", color = "Gender:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_offers_on-site_gen_corr.jpeg")
-
-#race
-offsite_offers_peer_cor_coefs <- cor.test(as.numeric(fig4_data_peer$faculty_offers), 
-                                        as.numeric(fig4_data_peer$off_site_interviews))
-
-offsite_offers_nonpeer_cor_coefs <- cor.test(as.numeric(fig4_data_nonpeer$faculty_offers), 
-                                           as.numeric(fig4_data_nonpeer$off_site_interviews))
-
-
-ggplot(data = fig4_data, aes(x = as.numeric(faculty_offers), 
-                             y = as.numeric(off_site_interviews))) +
-  geom_point(aes(fill = peer, color = peer)) +
-  scale_fill_manual(values = peer_color)+
-  scale_color_manual(values = peer_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999") +
-  geom_smooth(aes(fill = peer, color = peer), method=lm, se=TRUE) +
-  annotate("text", x = 4.5, y = 13, 
-           label = paste0("R: ", round(offsite_offs_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 12, 
-           label = paste0("p-value: ", round(offsite_offs_cor_coefs$p.value, 5)))+
-  #peer data
-  annotate("text", x = .5, y = .5, color = "#CC79A7",
-           label = paste0("R: ", round(offsite_offers_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = .5, y = -0.5, color = "#CC79A7",
-           label = paste0("p-value: ", round(offsite_offers_peer_cor_coefs$p.value, 5)))+
-  #nonpeer data
-  annotate("text", x = 4, y = 17, color = "#56B4E9",
-           label = paste0("R: ", round(offsite_offers_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4, y = 16, color = "#56B4E9",
-           label = paste0("p-value: ", round(offsite_offers_nonpeer_cor_coefs$p.value, 7)))+  
-  labs(y = "Number of off-site interviews", x = "Number of faculty offers",
-       fill = "PEER identity:", color = "PEER identity:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_offers_off-site_peer_corr.jpeg")
-
-onsite_offers_peer_cor_coefs <- cor.test(as.numeric(fig4_data_peer$faculty_offers), 
-                                       as.numeric(fig4_data_peer$on_site_interviews))
-
-onsite_offers_nonpeer_cor_coefs <- cor.test(as.numeric(fig4_data_nonpeer$faculty_offers), 
-                                          as.numeric(fig4_data_nonpeer$on_site_interviews))
-
-
-ggplot(data = fig4_data, aes(x = as.numeric(faculty_offers), 
-                             y = as.numeric(on_site_interviews))) +
-  geom_point(aes(fill = peer, color = peer)) +
-  scale_fill_manual(values = peer_color)+
-  scale_color_manual(values = peer_color)+
-  scale_y_continuous(expand = c(0,0))+
-  scale_x_continuous(expand = c(0,0))+
-  geom_smooth(method=lm, se=TRUE, color="black", fill="#999999")+
-  geom_smooth(aes(fill = peer, color = peer), method=lm, se=TRUE)+
-  annotate("text", x = 4.5, y = 7.5, 
-           label = paste0("R: ", round(onsite_offers_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 7.2, 
-           label = paste0("p-value: ", round(onsite_offers_cor_coefs$p.value, 25)))+
-  #peer data
-  annotate("text", x = 4.5, y = 2.5, color = "#CC79A7",
-           label = paste0("R: ", round(onsite_offers_peer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 4.5, y = 2.20, color = "#CC79A7",
-           label = paste0("p-value: ", round(onsite_offers_peer_cor_coefs$p.value, 10)))+
-  #nonpeer data
-  annotate("text", x = 2.5, y = 5.5, color = "#56B4E9",
-           label = paste0("R: ", round(onsite_offers_nonpeer_cor_coefs$estimate, 2))) +
-  annotate("text", x = 2.5, y = 5.2, color = "#56B4E9",
-           label = paste0("p-value: ", round(onsite_offers_nonpeer_cor_coefs$p.value, 20)))+  
-  labs(y = "Number of on-site interviews", x = "Number of faculty offers",
-       fill = "PEER identity:", color = "PEER identity:")+
-  my_theme_leg_bottom_horiz
-
-ggsave("social_science/figures/fig4_offers_on-site_peer_corr.jpeg")
-
-# Fig 4D Total Number of Interviews, Two groups Median # of applications -- Does the median differ significantly by gender or race? 
-
-# Fig 4E Offer percentage (applied faculty only, other jobs)
-fig4e_chi_table <- table(fig4_data$simple_faculty_offer, fig4_data$peer)
-
-fig4e_chi <- chisq.test(fig4e_chi_table)
-
-fig4_data %>% 
-  count(simple_faculty_offer, peer) %>% 
-  spread(key = simple_faculty_offer, value = n) %>% 
-  mutate(total = `0` + `1+`,
-         percent = get_percent(`1+`, total),
-         peer = paste0(peer, "\n(n = ", total, ")")) %>% 
-  ggplot(aes(x=peer, y = as.numeric(percent)))+
-  geom_col()+
-  scale_y_continuous(expand = c(0,0))+
+fig4d_plot <- fellow_data %>% 
+  ggplot(aes(x = `Postdoctoral Fellowship`, y = perc_offers, 
+             color = `Postdoctoral Fellowship`))+
+  geom_violin()+
+  geom_jitter()+
   coord_flip()+
-  labs(y="\nApplicants recieving 1+ faculty offer (%)", 
-       x="PEER identity",
-       subtitle = "Pearson's Chi-squared test with Yates' continuity correction\np>0.05")+
+  scale_color_manual(values = cbPalette)+
+  scale_y_continuous(expand = c(0,0))+
+  labs(x="\nPostdoctoral\nFellowship (n=151)", y="Percent offers\n",
+       subtitle = "Mann Whitney U: p<0.05")+
   my_theme_horiz
 
-ggsave("social_science/figures/fig4_percent_faculty_peer.jpeg")
+ggsave(filename = paste0("mollet_socialsci/figures/fig4d_",
+                         Sys.Date(), ".jpeg"))
+
+#E. number of papers: above/below median----
+papers_data <- fig4_data %>% 
+  filter(question == "peer-reviewed_papers") %>% 
+  mutate(median = if_else(response >= 5.0, "Above the\nmedian (5+)", 
+                          "Below the\nmedian (<5)")) %>% 
+  distinct()
+
+
+fig4_papers_wilcox <- wilcox.test(perc_offers ~ median,
+                                 data = papers_data,
+                                 na.rm=TRUE, paired=FALSE, 
+                                 exact=FALSE, conf.int=TRUE)
+
+fig4e_plot <- papers_data %>% 
+  ggplot(aes(x = median, y = perc_offers, 
+             color = median))+
+  geom_violin()+
+  geom_jitter()+
+  coord_flip()+
+  scale_color_manual(values = cbPalette)+
+  scale_y_continuous(expand = c(0,0))+
+  labs(x="Peer-reviewed\nPublications (n=150)", y="Percent offers\n",
+       subtitle = "Mann Whitney U: ns")+
+  my_theme_horiz
+
+ggsave(filename = paste0("mollet_socialsci/figures/fig4e_",
+                         Sys.Date(), ".jpeg"))
+
+#F. H-index: above/below median----
+h_data <- fig4_data %>% 
+  filter(question == "scholar_hindex") %>% 
+  mutate(median = if_else(response >= 4.0, 
+                          "Above the\nmedian (4+)", 
+                          "Below the\nmedian (<4)")) %>% 
+  distinct()
+
+
+fig4_h_wilcox <- wilcox.test(perc_offers ~ median,
+                                 data = h_data,
+                                 na.rm=TRUE, paired=FALSE, 
+                                 exact=FALSE, conf.int=TRUE)
+
+fig4f_plot <- h_data %>% 
+  ggplot(aes(x = median, y = perc_offers, 
+             color = median))+
+  geom_violin()+
+  geom_jitter()+
+  coord_flip()+
+  scale_color_manual(values = cbPalette)+
+  scale_y_continuous(expand = c(0,0))+
+  labs(x="\nGoogle Scholar\nH-index (n=78)", y="Percent offers\n",
+       subtitle = "Mann Whitney U: p<0.05")+
+  my_theme_horiz
+
+ggsave(filename = paste0("mollet_socialsci/figures/fig4f_",
+                         Sys.Date(), ".jpeg"))
+
+#G. 1st author papers: above/below median----
+fauth_data <- fig4_data %>% 
+  filter(question == "first_author") %>% 
+  mutate(median = if_else(response >= 3.0, 
+                          "Above the\nmedian (3+)", 
+                          "Below the\nmedian (<3)")) %>% 
+  distinct()
+
+
+fig4_fauth_wilcox <- wilcox.test(perc_offers ~ median,
+                                 data = fauth_data,
+                                 na.rm=TRUE, paired=FALSE, 
+                                 exact=FALSE, conf.int=TRUE)
+
+fig4g_plot <- fauth_data %>% 
+  ggplot(aes(x = median, y = perc_offers, 
+             color = median))+
+  geom_violin()+
+  geom_jitter()+
+  coord_flip()+
+  scale_color_manual(values = cbPalette)+
+  scale_y_continuous(expand = c(0,0))+
+  labs(x="First-author\npublications (n=145)", y="Percent offers\n",
+       subtitle = "Mann Whitney U: ns")+
+  my_theme_horiz
+
+ggsave(filename = paste0("mollet_socialsci/figures/fig4g_",
+                         Sys.Date(), ".jpeg"))
+
+#H. phd fellowship: y/n----
+fig4_phdfellow_wilcox <- wilcox.test(perc_offers ~ `Predoctoral Fellowship`,
+                                      data = fellow_data,
+                                      na.rm=TRUE, paired=FALSE, 
+                                      exact=FALSE, conf.int=TRUE)
+
+fig4h_plot <- fellow_data %>% 
+  ggplot(aes(x = `Predoctoral Fellowship`, y = perc_offers, 
+             color = `Predoctoral Fellowship`))+
+  geom_violin()+
+  geom_jitter()+
+  coord_flip()+
+  scale_color_manual(values = cbPalette)+
+  scale_y_continuous(expand = c(0,0))+
+  labs(x="\nPredoctoral\nFellowship (n=151)", y="Percent offers\n",
+       subtitle = "Mann Whitney U: ns")+
+  my_theme_horiz
+
+ggsave(filename = paste0("mollet_socialsci/figures/fig4h_",
+                         Sys.Date(), ".jpeg"))
+
+#generate plot----
+Fig4 <- plot_grid(fig4a_plot, fig4b_plot, fig4c_plot, fig4d_plot,
+                  fig4e_plot, fig4f_plot, fig4g_plot, fig4h_plot,
+                  labels = c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'),
+                  label_size = 18, ncol = 2)
+
+ggsave(filename = paste0("Figure_4_", Sys.Date(), ".png"), 
+       device = 'png', units = "in", scale = 1.75,
+       path = 'mollet_socialsci/figures/', width = 10, height = 11)

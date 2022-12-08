@@ -1,4 +1,4 @@
-source("code/load_data.R")
+#source("code/load_data.R")
 
 # Identify social science/humanities responses ----
 ss_ids <- demo_data %>% 
@@ -93,55 +93,13 @@ teaching_data <- ss_qualif_data %>%
                          "Yes, experience beyond TA", "Yes, TA")) %>% 
   distinct()
   
-source("social_science/code/figure_1.R")
-
-#Figure 2----
-
-fig2_data <- left_join(ss_qualif_data, fig1_gender, by = "id") %>% 
-  filter(!is.na(question)) %>% 
-  select(-section.x, -section.y) %>% 
-  distinct()
-
-fig2A_data <- fig2_data %>% 
-  filter(question == "first_author_binned" | 
-           question == "first_author") %>% 
-  distinct() 
-
-fig2ef_data <- fig2_data %>% 
-  filter(question == "grants_awarded") %>% 
-  mutate(fellowship = if_else(str_detect(response, "Fellowship"), "yes", "no"),
-         grant = if_else(str_detect(response, "Grant"), "yes", "no")) %>% 
-  select(-question, -response) %>% distinct() %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  filter(!is.na(grant))
-
-source("social_science/code/figure_2.R")
-
+source("mollet_socialsci/code/figure_1.R")
 
 #Figure 3----
-fig3_data <- left_join(ss_qualif_data, fig1_demo, by = "id") %>% 
-  filter(!is.na(question)) %>% 
-  select(-section) %>% 
-  distinct()
+source("mollet_socialsci/code/figure_3.R")
 
-fig3A_data <- fig3_data %>% 
-  filter(question == "first_author_binned" | 
-           question == "first_author") %>% 
-  distinct() 
-
-fig3ef_data <- fig3_data %>% 
-  filter(question == "grants_awarded") %>% 
-  mutate(fellowship = if_else(str_detect(response, "Fellowship"), "yes", "no"),
-         grant = if_else(str_detect(response, "Grant"), "yes", "no")) %>% 
-  select(-question, -response) %>% distinct() %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  filter(!is.na(grant))
-
-source("social_science/code/figure_3.R")
-
-
-#Figure 4----
-fig4_data <- ss_tidy_data %>% 
+#Figure 2----
+fig2_data <- ss_tidy_data %>% 
   select(id, question, response) %>% 
   filter(question == "simple_gender" | question == "off_site_interviews" |
            question == "on_site_interviews" | question == "peer" |
@@ -158,147 +116,162 @@ fig4_data <- ss_tidy_data %>%
   simple_faculty_offer = factor(simple_faculty_offer, 
                                 levels = c("0", "1+")))
 
-ss_id_simple_offer <- select(fig4_data, id, simple_faculty_offer)
+ss_id_simple_offer <- select(fig2_data, id, simple_faculty_offer)
 
-fig4_data_two <- fig4_data %>% 
+fig2_data_two <- fig2_data %>% 
   filter(simple_gender != "No Response")
 
-fig4_data_women <- fig4_data %>% 
+fig2_data_women <- fig2_data %>% 
   filter(simple_gender == "Woman/Trans/GNC")
 
-fig4_data_men <- fig4_data %>% 
+fig2_data_men <- fig2_data %>% 
   filter(simple_gender == "Man")
 
-fig4_data_peer <- fig4_data %>% 
+fig2_data_peer <- fig2_data %>% 
   filter(peer == "Yes")
 
-fig4_data_nonpeer <- fig4_data %>% 
+fig2_data_nonpeer <- fig2_data %>% 
   filter(peer == "No")
 
-fig4_tidy_data <- fig4_data %>% 
-  gather(2:6, key = question, value = response)
+fig2_tidy_data <- fig2_data %>% 
+  gather(2:6, key = question, value = response) %>% 
+  filter(question != "apps_submitted_binned") %>% 
+  mutate(question = case_when(
+    question == "apps_submitted" ~ "Applications submitted",
+    question == "faculty_offers" ~ "Faculty offers",
+    question == "off_site_interviews" ~ "Off-site interviews",
+    question == "on_site_interviews" ~ "On-site interviews"),
+    simple_gender = factor(simple_gender, levels = gender_simple_breaks),
+    peer = factor(peer, levels = peer_breaks))
 
-source("social_science/code/figure_4.R")
+source("mollet_socialsci/code/figure_2.R")
 
-
-#Figure 5----
-fig5_data <- ss_tidy_data %>% 
-  select(id, question, response) %>% 
-  filter(question == "application_cycles" | question == "faculty_offers" |
-           question == "grants_awarded"| question == "teaching_status" |
-           question == "apps_submitted" |
-           question == "PUI_apps_submitted") %>% 
-  left_join(., fig1_demo, by = "id") %>% 
-  distinct()
-
-fig5f_data <- fig5_data %>%  
-  filter(question == "grants_awarded") %>% 
-  filter(response == "Predoctoral Fellowship") %>% 
-  #filter(!is.na(response)) %>% 
-  select(-question) %>% 
-  distinct() %>% 
-  mutate(predoctoral = "yes") %>% 
-  left_join(fig5_data, ., by = c("id", "peer", "simple_gender")) %>% 
-  select(id, peer, simple_gender, predoctoral) %>% distinct() %>% 
-  mutate(predoctoral = if_else(is.na(predoctoral), "no", predoctoral))
-
-fig5i_data <- fig5_data %>% 
-  filter(question == "teaching_status" | question == "faculty_offers" |
-           question == "apps_submitted" |
-           question == "PUI_apps_submitted") %>% 
-  spread(key = question, value = response) %>% 
-  filter(!is.na(apps_submitted)) %>% 
-  mutate(percent_PUI = get_percent(PUI_apps_submitted, apps_submitted),
-         percent_offer = get_percent(faculty_offers, apps_submitted))
-
-source("social_science/code/figure_5.R")
-
-#Figure 6----
-fig6_data <- left_join(ss_tidy_data, ss_id_simple_offer, by = "id") %>% 
-  left_join(., fig1_demo, by = "id") %>% distinct()
-
-fig6a_data <- fig6_data %>% 
-  filter(inst_type == "phd_institution" & inst_key == "PUI_RI") %>% 
-  select(-question, -inst_type, -section, -inst_key, -response) %>% 
-  distinct()
-
-fig6b_data <- ss_tidy_data %>% 
-  select(id, question, response) %>% 
-  distinct() %>% 
-  filter(question == "advisor_rank") %>% 
-  left_join(ss_id_simple_offer, ., by = "id") %>% 
-  distinct()
-
-fig6c_data <- ss_tidy_data %>% 
-  select(id, question, response) %>% 
-  filter(question == "app_feedback") %>% 
-  distinct() %>% 
-  spread(key = question, value = response) %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  left_join(., fig1_demo, by = "id")
-
-fig6d_data <- ss_tidy_data %>% 
-  select(id, question, response) %>% 
-  filter(question == "interview_feedback") %>% 
-  distinct() %>% 
-  spread(key = question, value = response) %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  left_join(., fig1_demo, by = "id")
-
-fig6e_data <- fig6_data %>% 
-  select(id, question, response) %>% 
-  filter(question == "workshops_home") %>% distinct() %>% 
-  left_join(ss_ids, ., by = "id")%>% 
-  left_join(., fig1_demo, by = "id")
-
-fig6f_data <- fig6_data %>% 
-  select(id, question, response) %>% 
-  filter(question == "workshops_third_party") %>% distinct() %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  left_join(., fig1_demo, by = "id")
-
-fig6g_data <- fig6_data %>% 
-  select(id, question, response) %>% 
-  filter(question == "website_hosted") %>% distinct() %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  left_join(., fig1_res, by = "id")
-
-fig6h_data <- fig6_data %>% 
-  select(id, question, response) %>% 
-  filter(question == "social_media") %>% distinct() %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  left_join(., fig1_res, by = "id")
-
-source("social_science/code/figure_6.R")
-
-#Figure 7----
-fig7_data <- ss_tidy_data %>% 
+#Figure 4 ----
+fig4_data <- ss_tidy_data %>% 
   select(id, question, response) %>% 
   filter(!is.na(question)) %>% 
   filter(question %in% c("first_author",
-                        "peer-reviewed_papers", "scholar_hindex",
-                        "scholar_citations_all","transition_award", 
-                        "fellowship", "application_cycles", "faculty_offers",
-                        "apps_submitted", "grants_awarded")) %>% 
+                         "peer-reviewed_papers", "scholar_hindex",
+                         "scholar_citations_all","transition_award", 
+                         "fellowship", "application_cycles", "faculty_offers",
+                         "apps_submitted", "grants_awarded",
+                         "teaching_status")) %>% 
   distinct()
 
-offer_percent_data <- fig7_data %>% 
+offer_percent_data <- fig4_data %>% 
   filter(question == "apps_submitted" | question == "faculty_offers") %>% 
   spread(key = question, value = response) %>% 
   mutate(perc_offers = get_percent(faculty_offers, apps_submitted)) %>% 
   select(id, perc_offers)
 
-fig7_summary <- fig7_data %>% 
+fig4_summary <- fig4_data %>% 
   filter(question %not_in% c("transition_award", "fellowship",
-                             "grants_awarded")) %>% 
+                             "grants_awarded", "teaching_status")) %>% 
   group_by(question) %>% 
   summarise(n = n(), med = median(as.numeric(response), 
                                   na.rm = TRUE))
 
-fig7_data <- left_join(fig7_data, offer_percent_data, by = "id") %>% 
+fig4_data <- left_join(fig4_data, offer_percent_data, by = "id") %>% 
   distinct()
 
-source("social_science/code/figure_7.R")
+source("mollet_socialsci/code/figure_4.R")
+
+#Figure 5----
+fig5_data <- left_join(ss_qualif_data, fig1_gender, by = "id") %>% 
+  filter(!is.na(question)) %>% 
+  select(-section.x, -section.y) %>% 
+  distinct()
+
+fig5A_data <- fig5_data %>% 
+  filter(question == "first_author_binned" | 
+           question == "first_author") %>% 
+  distinct() 
+
+fig5ef_data <- fig5_data %>% 
+  filter(question == "grants_awarded") %>% 
+  mutate(fellowship = if_else(str_detect(response, "Fellowship"), "yes", "no"),
+         grant = if_else(str_detect(response, "Grant"), "yes", "no")) %>% 
+  select(-question, -response) %>% distinct() %>% 
+  left_join(ss_ids, ., by = "id") %>% 
+  filter(!is.na(grant))
+
+source("mollet_socialsci/code/figure_5.R")
+
+#Figure 6----
+fig6_data <- left_join(ss_qualif_data, fig1_demo, by = "id") %>% 
+  filter(!is.na(question)) %>% 
+  select(-section) %>% 
+  distinct()
+
+fig6a_data <- fig6_data %>% 
+  filter(question == "first_author_binned" | 
+           question == "first_author") %>% 
+  distinct() 
+
+fig6ef_data <- fig6_data %>% 
+  filter(question == "grants_awarded") %>% 
+  mutate(fellowship = if_else(str_detect(response, "Fellowship"), "yes", "no"),
+         grant = if_else(str_detect(response, "Grant"), "yes", "no")) %>% 
+  select(-question, -response) %>% distinct() %>% 
+  left_join(ss_ids, ., by = "id") %>% 
+  filter(!is.na(grant))
+
+source("mollet_socialsci/code/figure_6.R")
+
+#Figure 7----
+fig7_data <- ss_tidy_data %>% 
+  select(id, question, response) %>% 
+  filter(question == "simple_gender" | question == "off_site_interviews" |
+           question == "on_site_interviews" | question == "peer" |
+           question == "faculty_offers" | 
+           question == "apps_submitted_binned" |
+           question == "apps_submitted") %>% 
+  distinct() %>% 
+  spread(key = question, value = response) %>% 
+  filter(!is.na(apps_submitted)) %>% 
+  mutate(simple_faculty_offer = case_when(
+    as.numeric(faculty_offers) == 0 ~ "0",
+    as.numeric(faculty_offers) >= 1 ~ "1+"
+  ),
+  simple_faculty_offer = factor(simple_faculty_offer, 
+                                levels = c("0", "1+")))
+
+ss_id_simple_offer <- select(fig7_data, id, simple_faculty_offer)
+
+fig7_data_two <- fig7_data %>% 
+  filter(simple_gender != "No Response")
+
+fig7_data_women <- fig7_data %>% 
+  filter(simple_gender == "Woman/Trans/GNC")
+
+fig7_data_men <- fig7_data %>% 
+  filter(simple_gender == "Man")
+
+fig7_data_peer <- fig7_data %>% 
+  filter(peer == "Yes")
+
+fig7_data_nonpeer <- fig7_data %>% 
+  filter(peer == "No")
+
+fig7_tidy_data <- fig7_data %>% 
+  gather(2:6, key = question, value = response)
+
+source("mollet_socialsci/code/figure_7.R")
+
+#Figure 8----
+
+source("mollet_socialsci/code/figure_8.R")
+
+#Figure 9----
+fig9_data <- left_join(ss_tidy_data, ss_id_simple_offer, by = "id") %>% 
+  left_join(., fig1_demo, by = "id") %>% distinct() %>% 
+  select(id, question, response) %>% 
+  filter(question == "workshops_third_party") %>% 
+  distinct() %>% 
+  left_join(ss_ids, ., by = "id") %>% 
+  left_join(., fig1_demo, by = "id")
+
+source("mollet_socialsci/code/figure_9.R")
 
 #demo table
 demo_table <- ss_demo_data %>% 
@@ -317,10 +290,10 @@ demo_table <- ss_demo_data %>%
   count(question, response) %>% 
   mutate(percent_total = get_percent(n, 276))
 
-#write_csv(demo_table, "social_science/figures/demographics.csv")
+#write_csv(demo_table, "mollet_socialsci/figures/demographics.csv")
 
 #table of application metrics
-metrics_table <- fig7_data %>% 
+metrics_table <- fig4_data %>% 
   filter(question %not_in% c("transition_award", "fellowship",
                              "grants_awarded")) %>% 
   group_by(question) %>% 
@@ -333,11 +306,11 @@ metrics_table <- fig7_data %>%
   mutate(range = paste0("(", min_val, ", ", max_val, ")")) %>% 
   select(-min_val, -max_val)
 
-#write_csv(metrics_table, "social_science/figures/metrics.csv")
+#write_csv(metrics_table, "mollet_socialsci/figures/metrics.csv")
 
-metrics_table2 <- fig7_data %>% 
+metrics_table2 <- fig4_data %>% 
   filter(question == "grants_awarded") %>% 
   count(question, response) %>% 
   mutate(percent = get_percent(n, 276))
 
-#write_csv(metrics_table2, "social_science/figures/grants.csv")
+#write_csv(metrics_table2, "mollet_socialsci/figures/grants.csv")

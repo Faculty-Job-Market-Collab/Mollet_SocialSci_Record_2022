@@ -2,7 +2,7 @@
 #A. Application cycles---- 
 # Compare social sciences and humanities (Two-tailed Wilcoxon rank sum test)
 fig1a_wilcox <- wilcox.test(num_application_cycles ~ research_category, 
-                            data = fig1h_data,
+                            data = fig1a_data,
                             na.rm=TRUE, paired=FALSE, 
                             exact=FALSE, conf.int=TRUE)
 
@@ -35,7 +35,13 @@ ggsave(filename = paste0("mollet_socialsci/figures/fig1a_",
 fig1b_plot <- fig1b_data %>% 
   get_plot_summary(., "research_category", 
                    "number_postdocs", binary = FALSE) %>% 
-  ggplot(aes(x=number_postdocs, y = percent,
+  mutate(number_postdocs = fct_explicit_na(as.character(number_postdocs),
+                               #levels = c("1", "2", "3", ">3"),
+                               na_level = "No\nResponse")) %>% 
+  #View()
+  ggplot(aes(x=factor(number_postdocs, 
+                      levels = c("No\nResponse", "1", "2", "3", ">3")), 
+             y = percent,
              fill = research_category))+
   geom_col(position = "dodge")+
   scale_fill_manual(breaks = research_breaks, values = cbPalette)+
