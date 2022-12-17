@@ -225,7 +225,8 @@ fig7_data <- ss_tidy_data %>%
            question == "on_site_interviews" | question == "peer" |
            question == "faculty_offers" | 
            question == "apps_submitted_binned" |
-           question == "apps_submitted") %>% 
+           question == "apps_submitted" |
+           question == "off_site_interviews_binned") %>% 
   distinct() %>% 
   spread(key = question, value = response) %>% 
   filter(!is.na(apps_submitted)) %>% 
@@ -236,12 +237,52 @@ fig7_data <- ss_tidy_data %>%
   simple_faculty_offer = factor(simple_faculty_offer, 
                                 levels = c("0", "1+")),
   peer = factor(peer, peer_breaks),
-  simple_gender = factor(simple_gender, gender_simple_breaks))
+  simple_gender = factor(simple_gender, gender_simple_breaks),
+  apps_submitted_binned = factor(apps_submitted_binned, 
+                                 levels = bin_levels_small),
+  off_site_interviews_binned = factor(off_site_interviews_binned,
+                                      levels = bin_levels_small))
 
 ss_id_simple_offer <- select(fig7_data, id, simple_faculty_offer)
 
+app_dummy_var <- fig7_data %>% 
+  select(apps_submitted_binned) %>% distinct() %>% 
+  arrange(apps_submitted_binned) %>% 
+  rowid_to_column(., "apps_bin_dummy")
+
+offsite_dummy_var <- fig7_data %>% 
+  filter(!is.na(off_site_interviews_binned)) %>% 
+  select(off_site_interviews_binned) %>% distinct() %>% 
+  arrange(off_site_interviews_binned) %>% 
+  rowid_to_column(., "offsite_bin_dummy")
+
 fig7_data_two <- fig7_data %>% 
-  filter(simple_gender != "No Response")
+  filter(simple_gender != "No Response") %>% 
+  left_join(., app_dummy_var, by = "apps_submitted_binned") %>% 
+  left_join(., offsite_dummy_var, by = "off_site_interviews_binned") %>% 
+  mutate(gender_dummy = case_when(
+    simple_gender == "Man" ~ 0,
+    simple_gender == "Woman/Trans/GNC" ~ 1),
+    on_site_interviews = as.numeric(on_site_interviews)) %>% 
+  distinct()
+
+fig8_data <- fig7_data %>% 
+  left_join(., app_dummy_var, by = "apps_submitted_binned") %>% 
+  left_join(., offsite_dummy_var, by = "off_site_interviews_binned") %>% 
+  mutate(peer_dummy = case_when(
+    peer == "Yes" ~ 0,
+    peer == "No" ~ 1),
+    on_site_interviews = as.numeric(on_site_interviews)) %>% 
+  distinct()
+
+apps_bin_list <- c("0", "1", "2", "3", "4", 
+                   "5-9", "10-14", "15-19", "20-29", 
+                   "30-39", "40-49", "50-99", 
+                   "100-199", "200-299", "300+")
+
+offsite_bin_list <- c("0", "1", "2", "3", "4", 
+                   "5-9", "10-14", "15-19", "20-29", 
+                   "30-39")
 
 fig7_data_women <- fig7_data %>% 
   filter(simple_gender == "Woman/Trans/GNC")
@@ -256,24 +297,14 @@ fig7_data_nonpeer <- fig7_data %>%
   filter(peer == "No")
 
 fig7_tidy_data <- fig7_data %>% 
-  gather(2:6, key = question, value = response)
+  gather(2:6, key = question, value = response) %>% 
+  filter(!is.na(simple_faculty_offer))
 
 source("mollet_socialsci/code/figure_7.R")
 
 #Figure 8----
 
 source("mollet_socialsci/code/figure_8.R")
-
-#Figure 9----
-fig9_data <- left_join(ss_tidy_data, ss_id_simple_offer, by = "id") %>% 
-  left_join(., fig1_demo, by = "id") %>% distinct() %>% 
-  select(id, question, response) %>% 
-  filter(question == "workshops_third_party") %>% 
-  distinct() %>% 
-  left_join(ss_ids, ., by = "id") %>% 
-  left_join(., fig1_demo, by = "id")
-
-source("mollet_socialsci/code/figure_9.R")
 
 #demo table
 demo_table <- ss_demo_data %>% 
