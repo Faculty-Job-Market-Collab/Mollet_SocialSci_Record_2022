@@ -21,6 +21,8 @@ fig7a_plot <- interact_plot(fig7a_lm, pred = apps_bin_dummy, modx = gender_dummy
                                 "5-9", "10-14", "15-19", "20-29",
                                 "30-39", "40-49", "50-99",
                                 "100-199", "200-299", "300+"))+
+  annotate("text", x = 5, y = 5, size = 6,
+           label="Intercept p=0.15\nApplications p<0.01\nGender p=0.92\nApplications:Gender p=0.63")+
   my_theme
 
 ggsave(paste0("mollet_socialsci/figures/fig7a_", Sys.Date(), ".jpeg"))
@@ -48,6 +50,8 @@ fig7b_plot <- interact_plot(fig7b_lm, pred = apps_bin_dummy,
                                 "5-9", "10-14", "15-19", "20-29",
                                 "30-39", "40-49", "50-99",
                                 "100-199", "200-299", "300+"))+
+  annotate("text", x = 5, y = 2.25, size = 6,
+           label="Intercept p=0.93\nApplications p<0.05\nGender p=0.72\nApplications:Gender p=0.16")+
   my_theme
 
 ggsave(paste0("mollet_socialsci/figures/fig7b_", Sys.Date(), ".jpeg"))
@@ -67,13 +71,15 @@ fig7c_plot <- interact_plot(fig7c_lm, pred = apps_bin_dummy,
                             x.label = "Number of applications submitted", 
                             y.label = "Number of faculty offers",
                             colors = gender_color)+
-  scale_y_continuous(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0), breaks = c(0,1,2))+
   scale_x_continuous(breaks = c(1, 2, 3, 4, 5, 6, 7,
                                 8, 9, 10, 11, 12, 13, 14, 15), 
                      labels = c("0", "1", "2", "3", "4", 
                                 "5-9", "10-14", "15-19", "20-29",
                                 "30-39", "40-49", "50-99",
                                 "100-199", "200-299", "300+"))+
+  annotate("text", x = 5, y = 0.9, size = 6,
+           label="Intercept p=0.66\nApplications p=0.23\nGender p=0.92\nApplications:Gender p=0.47")+
   my_theme
 
 ggsave(paste0("mollet_socialsci/figures/fig7c_", Sys.Date(), ".jpeg"))
@@ -96,7 +102,9 @@ fig7d_plot <- interact_plot(fig7d_lm, pred = offsite_bin_dummy,
   scale_x_continuous(breaks = c(1, 2, 3, 4, 5, 6, 7,
                                 8, 9, 10), 
                      labels = offsite_bin_list)+
-  scale_y_continuous(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0), breaks = c(0,1,2))+
+  annotate("text", x = 3, y = 1.25, size = 6,
+           label="Intercept p=0.86\nInterviews p=0.01\nGender p=0.37\nInterviews:Gender p=0.74")+
   my_theme
 
 ggsave(paste0("mollet_socialsci/figures/fig7d_", Sys.Date(), ".jpeg"))
@@ -118,7 +126,9 @@ fig7e_plot_leg <- interact_plot(fig7e_lm,
                             y.label = "Number of faculty offers",
                             legend.main = "Gender",
                             colors = gender_color)+
-  scale_y_continuous(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0), breaks = c(0,1,2,3,4))+
+  annotate("text", x = 2, y = 2.25, size = 6,
+           label="Intercept p=0.41\nInterviews p<0.01\nGender p=0.74\nInterviews:Gender p=0.62")+
   base_theme
 
 fig7e_plot <- fig7e_plot_leg + my_theme_horiz
