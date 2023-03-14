@@ -2,8 +2,8 @@
 
 #A. 1st author pubs (Two-tailed Wilcoxon rank sum test)----
 fig6A_mwu_data <- fig6a_data %>% 
-  filter(question == "first_author") %>% 
-  filter(peer != "No Response") %>% distinct()
+  filter(question == "first_author") %>%
+  distinct()
 
 fig6A_wilcox <- wilcox.test(as.numeric(response) ~ peer,
                             data = fig6A_mwu_data,
@@ -40,7 +40,6 @@ ggsave(paste0("mollet_socialsci/figures/fig6a_", Sys.Date(), ".jpeg"))
 #B. H-index (Two-tailed Wilcoxon rank sum test)----
 fig6b_mwu_data <-fig6_data %>% 
   filter(question == "scholar_hindex") %>% 
-  filter(peer != "No Response") %>% 
   distinct() 
 
 fig6b_wilcox <- wilcox.test(as.numeric(response) ~ peer,
@@ -74,7 +73,6 @@ ggsave(paste0("mollet_socialsci/figures/fig6b_", Sys.Date(), ".jpeg"))
 #C. Total Pubs (Two-tailed Wilcoxon rank sum test) ----
 fig6c_mwu_data <-fig6_data %>% 
   filter(question == "peer-reviewed_papers") %>% 
-  filter(peer != "No Response") %>% 
   distinct() 
 
 fig6c_wilcox <- wilcox.test(as.numeric(response) ~ peer,
@@ -100,27 +98,28 @@ fig6c_plot <- fig6_data %>%
   scale_y_continuous(expand = c(0,0))+
   labs(x = "Number of peer-reviewed papers\n",
        y = "Percent of respondents\nby PEER status",
-       subtitle = "Mann Whitney U: p>0.05")+
+       subtitle = "Mann Whitney U: p<0.01")+
   my_theme
 
 ggsave(paste0("mollet_socialsci/figures/fig6c_", Sys.Date(), ".jpeg"))
 
 #D. Percent of applicants w/ grants (chi-square)----
 fig6d_tab_data <- fig6ef_data %>% 
-  filter(peer != "No Response") 
+  select(id, grant, peer) %>% 
+  distinct()
 
 fig6d_table <- table(fig6d_tab_data$grant, 
                      fig6d_tab_data$peer)
 
-fig6d_table <- fig6d_table[,-3]
+#fig6d_table <- fig6d_table[,-3]
 
 fig6d_chi <- chisq.test(fig6d_table)
 
 fig6d_plot <- fig6ef_data %>% 
   count(peer, grant) %>% 
   spread(key = grant, value = n) %>% 
-  mutate(total = yes + no,
-         percent = get_percent(yes, total),
+  mutate(total = Yes + No,
+         percent = get_percent(Yes, total),
          peer_count = paste0(peer, "\n(n = ", total, ")"),
          peer = factor(peer, peer_breaks)) %>%
   ggplot(aes(x=peer_count, 
@@ -142,7 +141,6 @@ ggsave(paste0("mollet_socialsci/figures/fig6d_", Sys.Date(), ".jpeg"))
 #E. All Citations (Two-tailed Wilcoxon rank sum test)----
 fig6e_mwu_data <-fig6_data %>% 
   filter(question == "scholar_citations_all") %>% 
-  filter(peer != "No Response") %>% 
   distinct() 
 
 fig6e_wilcox <- wilcox.test(as.numeric(response) ~ peer,
@@ -175,20 +173,21 @@ ggsave(paste0("mollet_socialsci/figures/fig6e_", Sys.Date(), ".jpeg"))
 
 #F. Percent of applicants w/ fellowships (chi-square)----
 fig6f_tab_data <- fig6ef_data %>% 
-  filter(peer != "No Response") 
+  select(id, fellowship, peer) %>% 
+  distinct()
 
 fig6f_table <- table(fig6f_tab_data$fellowship, 
                      fig6f_tab_data$peer)
 
-fig6f_table <- fig6f_table[,-3]
+#fig6f_table <- fig6f_table[,-3]
 
-fig6f_chi <- chisq.test(fig6f_table)
+fig6f_chi <- chisq.test(fig6f_table, simulate.p.value = TRUE)
 
 fig6f_plot <- fig6ef_data %>% 
   count(peer, fellowship) %>% 
   spread(key = fellowship, value = n) %>% 
-  mutate(total = yes + no,
-         percent = get_percent(yes, total),
+  mutate(total = Yes + No,
+         percent = get_percent(Yes, total),
          peer_count = paste0(peer, 
                                 "\n(n = ", total, ")"),
          peer = factor(peer, peer_breaks)) %>% 
@@ -201,7 +200,7 @@ fig6f_plot <- fig6ef_data %>%
   scale_y_continuous(expand = c(0,0))+
   labs(y="Percent of responses\nby PEER status", 
        x="PEER status of applicants that received a\npre- or postdoctoral fellowship",
-       subtitle = "Pearson's Chi-squared test with\nYates' continuity correction\np>0.05")+
+       subtitle = "Pearson's Chi-squared test with\nsimulated p-value:\np>0.05")+
   my_theme_horiz
 
 ggsave(paste0("mollet_socialsci/figures/fig6f_", Sys.Date(), ".jpeg"))

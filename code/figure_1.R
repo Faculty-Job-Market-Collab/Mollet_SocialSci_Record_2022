@@ -27,7 +27,7 @@ fig1a_plot_leg <- fig1a_data %>%
   labs(y="Percent Respondents", 
        x="Number of application cycles\n",
        fill = "Field",
-       subtitle = paste("Mann-Whitney U: p<0.01"))+
+       subtitle = paste("Mann-Whitney U: p<0.05"))+
   base_theme
 
 fig1a_plot <- fig1a_plot_leg + my_theme

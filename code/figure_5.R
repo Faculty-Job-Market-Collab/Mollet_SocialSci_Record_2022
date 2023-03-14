@@ -107,15 +107,15 @@ fig5d_tab_data <- fig5ef_data %>%
 fig5d_table <- table(fig5d_tab_data$grant, 
                      fig5d_tab_data$simple_gender)
 
-fig5d_table <- fig5d_table[,-3]
+#fig5d_table <- fig5d_table[,-3]
 
-fig5d_chi <- chisq.test(fig5d_table)
+fig5d_chi <- chisq.test(fig5d_table, simulate.p.value = TRUE)
 
 fig5d_plot <- fig5ef_data %>% 
   count(simple_gender, grant) %>% 
   spread(key = grant, value = n) %>% 
-  mutate(total = yes + no,
-         percent = get_percent(yes, total),
+  mutate(total = Yes + No,
+         percent = get_percent(Yes, total),
          gender_count = paste0(simple_gender, "\n(n = ", total, ")"),
          simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
   ggplot(aes(x=gender_count, y = as.numeric(percent),
@@ -127,7 +127,7 @@ fig5d_plot <- fig5ef_data %>%
   scale_y_continuous(expand = c(0,0))+
   labs(y="Percent of responses\nby gender", 
        x="Applicants that recieved a grant",
-       subtitle = paste0("Pearson's Chi-squared test with\nYates' continuity correction\np>0.05"))+
+       subtitle = paste0("Pearson's Chi-squared test with\nsimulated p-value\np>0.05"))+
   my_theme_horiz+
   right_margin
 
@@ -136,7 +136,6 @@ ggsave(paste0("mollet_socialsci/figures/fig5d_", Sys.Date(), ".jpeg"))
 #E. All Citations (Two-tailed Wilcoxon rank sum test)----
 fig5e_mwu_data <-fig5_data %>% 
   filter(question == "scholar_citations_all") %>% 
-  filter(simple_gender != "No Response") %>% 
   distinct() 
 
 fig5e_wilcox <- wilcox.test(as.numeric(response) ~ simple_gender,
@@ -169,20 +168,21 @@ ggsave(paste0("mollet_socialsci/figures/fig5e_", Sys.Date(), ".jpeg"))
 
 #F. Percent of applicants w/ fellowships (chi-square)----
 fig5f_tab_data <- fig5ef_data %>% 
-  filter(simple_gender != "No Response") 
+  select(id, simple_gender, fellowship) %>% 
+  distinct()
 
 fig5f_table <- table(fig5f_tab_data$fellowship, 
                      fig5f_tab_data$simple_gender)
 
-fig5f_table <- fig5f_table[,-3]
+#fig5f_table <- fig5f_table[,-3]
 
-fig5f_chi <- chisq.test(fig5f_table)
+fig5f_chi <- chisq.test(fig5f_table, simulate.p.value = TRUE)
 
 fig5f_plot <- fig5ef_data %>% 
   count(simple_gender, fellowship) %>% 
   spread(key = fellowship, value = n) %>% 
-  mutate(total = yes + no,
-         percent = get_percent(yes, total),
+  mutate(total = Yes + No,
+         percent = get_percent(Yes, total),
          gender_count = paste0(simple_gender, 
                                 "\n(n = ", total, ")"),
          simple_gender = factor(simple_gender, gender_simple_breaks)) %>% 
@@ -195,7 +195,7 @@ fig5f_plot <- fig5ef_data %>%
   scale_y_continuous(expand = c(0,0))+
   labs(y="Percent of responses\nby gender", 
        x="Gender of applicants that received a\npre- or postdoctoral fellowship",
-       subtitle = "Pearson's Chi-squared test with\nYates' continuity correction\np>0.05")+
+       subtitle = "Pearson's Chi-squared test with\nsimulated p-value:\np>0.05")+
   my_theme_horiz
 
 ggsave(paste0("mollet_socialsci/figures/fig5f_", Sys.Date(), ".jpeg"))
